@@ -28,7 +28,6 @@ public class KieServerConfiguration {
         Set<Class<?>> allClasses = new HashSet<Class<?>>();
         allClasses.add(Message.class);
         conf.addExtraClasses(allClasses);
-        //conf.setMarshallingFormat(FORMAT);
         kieServicesClient = KieServicesFactory.newKieServicesClient(conf);
 
         return kieServicesClient;

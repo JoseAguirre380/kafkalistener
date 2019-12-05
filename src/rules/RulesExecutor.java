@@ -1,12 +1,11 @@
 package rules;
 
-import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.ResourceBundle;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import configuration.KieServerConfiguration;
 import models.Message;
 import org.drools.core.command.runtime.rule.GetObjectsCommand;
 import org.kie.api.KieServices;
@@ -14,6 +13,8 @@ import org.kie.api.command.Command;
 import org.kie.api.command.KieCommands;
 
 import org.kie.api.runtime.ExecutionResults;
+import org.kie.api.runtime.rule.QueryResults;
+import org.kie.api.runtime.rule.QueryResultsRow;
 import org.kie.server.api.model.KieServiceResponse;
 import org.kie.server.api.model.ServiceResponse;
 import org.kie.server.client.RuleServicesClient;
@@ -36,30 +37,37 @@ public class RulesExecutor {
             KieCommands commandsFactory = KieServices.Factory.get().getCommands();
 
             GetObjectsCommand getObjectsCommand = new GetObjectsCommand();
-            getObjectsCommand.setOutIdentifier("message");
+            getObjectsCommand.setOutIdentifier("objects");
 
-            Command<?> insert = commandsFactory.newInsert(message);
-            Command<?> agendaGroup = commandsFactory.newAgendaGroupSetFocus("EstadoViaje");
+            Command<?> insert = commandsFactory.newInsert(message,"objectIdetifier");
+            //Command<?> agendaGroup = commandsFactory.newAgendaGroupSetFocus("EstadoViaje");
             Command<?> fireAllRules = commandsFactory.newFireAllRules();
-            Command<?> getObjects = commandsFactory.newGetObjects("message");
+            Command<?> getObjects = commandsFactory.newGetObjects("objects");
 
-            Command<?> batchCommand = commandsFactory.newBatchExecution(Arrays.asList(insert,agendaGroup, getObjects, fireAllRules));
+
+            Command<?> batchCommand = commandsFactory.newBatchExecution(Arrays.asList(insert, getObjects, fireAllRules));
 
             ServiceResponse<ExecutionResults> executeResponse = rulesClient.executeCommandsWithResults(containerId, batchCommand);
 
+
+
             if (executeResponse.getType() == KieServiceResponse.ResponseType.SUCCESS) {
                 System.out.println("Commands executed with success! Response: ");
-                //System.out.println(executeResponse.getResult().toString());
 
-                List responseList = (List) executeResponse.getResult().getValue("message");
 
-                Message responseMessage = (Message) responseList.get(responseList.size()-1);
-
+                Message responseMessage = (Message)executeResponse.getResult().getValue("objectIdetifier");
 
                 System.out.println(("respuesta de objeto:" + responseMessage.toString()));
 
+                String AgendaGroupNname = "";
+                if (responseMessage.getData().containsKey("AgendaGroupName")){
+                    //Aqui recibira el nombre de la regla que quiere ejecutar
+                    AgendaGroupNname = responseMessage.getData().get("AgendaGroupName").toString();
+                }
+                System.out.println(AgendaGroupNname);
+
                 // Message messageResponse = (Message)executeResponse.getResult().getValue("message");
-                return Integer.parseInt(responseMessage.getData().get("EstatusViaje").toString());
+                return 1;
             } else {
                 System.out.println("Error executing rules. Message: ");
                 System.out.println(executeResponse.getMsg());

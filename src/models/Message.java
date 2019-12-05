@@ -8,6 +8,7 @@ private java.lang.String domain;
 private java.lang.String event;
 private java.lang.String timestamp;
 private java.util.Map data;
+private java.lang.String topic;
 
 public Message() {
         }
@@ -47,6 +48,14 @@ public Message(java.lang.String domain, java.lang.String event,
         this.event = event;
         this.timestamp = timestamp;
         this.data = data;
+        }
+
+        public String getTopic() {
+                return topic;
+        }
+
+        public void setTopic(String topic) {
+                this.topic = topic;
         }
 
         @Override
